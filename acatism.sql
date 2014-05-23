@@ -1,13 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 3.5.1
+-- version 4.1.14
 -- http://www.phpmyadmin.net
 --
--- Host: localhost
--- Generation Time: May 22, 2014 at 07:30 AM
--- Server version: 5.5.24-log
--- PHP Version: 5.3.13
+-- Host: 127.0.0.1
+-- Generation Time: May 23, 2014 at 12:46 PM
+-- Server version: 5.6.17
+-- PHP Version: 5.5.12
 
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
 
@@ -94,17 +94,6 @@ CREATE TABLE IF NOT EXISTS `messages` (
   `type` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
---
--- Dumping data for table `messages`
---
-
-INSERT INTO `messages` (`from`, `to`, `message`, `type`) VALUES
-('1740329384756', '1921223294857', 'You have been accepted!', 'notif'),
-('1740329384756', '1930405384726', 'You have been rejected!', 'notif'),
-('1930405384726', '1740329384756', 'Acatism', 'apply'),
-('1740329384756', '1930425384726', 'You have been accepted!', 'notif'),
-('1740329384756', '2921217046192', 'You have been rejected!', 'notif');
-
 -- --------------------------------------------------------
 
 --
@@ -114,16 +103,18 @@ INSERT INTO `messages` (`from`, `to`, `message`, `type`) VALUES
 CREATE TABLE IF NOT EXISTS `registrations` (
   `picS` varchar(14) NOT NULL,
   `picT` varchar(14) NOT NULL,
-  `topic` varchar(30) NOT NULL
+  `topicId` int(30) NOT NULL,
+  UNIQUE KEY `picS` (`picS`),
+  UNIQUE KEY `theme` (`topicId`),
+  KEY `picT` (`picT`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `registrations`
 --
 
-INSERT INTO `registrations` (`picS`, `picT`, `topic`) VALUES
-('1921223294857', '1740329384756', 'AcRe'),
-('1930425384726', '1740329384756', 'Muler');
+INSERT INTO `registrations` (`picS`, `picT`, `topicId`) VALUES
+('1930425384726', '1740329384756', 0);
 
 -- --------------------------------------------------------
 
@@ -132,11 +123,11 @@ INSERT INTO `registrations` (`picS`, `picT`, `topic`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `requirements` (
-  `reqId` int(11) NOT NULL AUTO_INCREMENT,
+  `reqId` int(11) NOT NULL,
   `subjectId` int(11) NOT NULL,
   `grade` int(11) NOT NULL,
   PRIMARY KEY (`reqId`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=37 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `requirements`
@@ -148,19 +139,7 @@ INSERT INTO `requirements` (`reqId`, `subjectId`, `grade`) VALUES
 (3, 433, 7),
 (4, 432, 4),
 (5, 433, 7),
-(6, 431, 4),
-(13, 431, 5),
-(14, 432, 6),
-(15, 433, 2),
-(16, 431, 4),
-(17, 432, 5),
-(18, 433, 5),
-(19, 431, 5),
-(20, 432, 2),
-(21, 433, 5),
-(25, 431, 5),
-(26, 432, 4),
-(27, 433, 5);
+(6, 431, 4);
 
 -- --------------------------------------------------------
 
@@ -260,29 +239,46 @@ INSERT INTO `teachers` (`picT`, `name`, `surname`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `topics` (
-  `topicId` int(11) NOT NULL AUTO_INCREMENT,
+  `topicId` int(11) NOT NULL,
   `picT` varchar(255) NOT NULL,
   `title` varchar(255) NOT NULL,
   `description` varchar(10000) NOT NULL,
   `type` varchar(255) NOT NULL,
-  `requirement1` int(11) DEFAULT NULL,
-  `requirement2` int(11) DEFAULT NULL,
-  `requirement3` int(11) DEFAULT NULL,
-  `other` varchar(255) NOT NULL,
+  `domain` varchar(255) NOT NULL,
   PRIMARY KEY (`topicId`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `topics`
 --
 
-INSERT INTO `topics` (`topicId`, `picT`, `title`, `description`, `type`, `requirement1`, `requirement2`, `requirement3`, `other`) VALUES
-(1, '1740329384756', 'Acatism', 'Sa se realizeze o aplicatie Web privind managementul tezelor de licenta/master la nivelul unei facultati. Din punctul de vedere al profesorului, sistemul va oferi posibilitatea gestionarii temelor propuse si a studentilor arondati, inclusiv crearea unei planificari a celor mai importante etape pana la momentul sustinerii. Pentru studenti, aplicatia va fi capabila sa listeze/filtreze subiectele de interes pentru fiecare profesor in parte si sa permita inscrierea unei persoane in vederea indrumarii, eventual conform unor cerinte prelabile. Sistemul va verifica indeplinirea acestor cerinte, inclusiv va notifica -- via un flux Atom sau prin e-mail -- profesorul/studentul atunci cand survin intarzieri in efectuarea unor activitati (e.g., transmiterea unui raport preliminar) sau daca apar actualizari -- de pilda, profesorul a plasat o lista de lecturi recomandate. De asemenea, aplicatia va semnala posibile probleme privind variantele intermediare ale documentelor intocmite de student referitoare la format sau standarde de redactare. Progresul implementarii tezei va putea fi monitorizat automat prin intermermediul unui sistem online de management de cod-sursa precum Github.', 'bachelor', 1, 2, 3, ''),
-(2, '1740329384756', 'AcRe', 'Luand in consideratie pareri (barfe) deja disponibile din anii anteriori pe diverse retele sociale si statistici anonime privind notele obtinute (e.g., curba lui Gauss reala) la o materie, sa se realizeze un instrument Web ce recomanda unui student (restantier) grupa la care sa participe la orele de laborator + punctele slabe/tari ale studentului.', 'master', 4, 5, 6, ''),
-(5, '1740329384756', 'DigiX', 'Inainte de epoca digitala, amintirile personale se stocau in diverse cutii sau cufere in vederea pastrarii peste ani. Se doreste implementarea unei aplicatii Web cu rol de prezervare a acestor informatii sentimentale (in special anumite scrisori vechi, fotografii, filme, acte, relatii de rudenie si alte artefacte de interes). Sistemul va fi capabil sa interconecteze datele digitizate cu cele deja existente in mediul virtual in cadrul unor aplicatii sociale precum Facebook, Flickr, Google+, Vimeo etc. Se vor oferi posibilitati de cautare si filtrare sofisticata (e.g., toate fotografiile de vacanta infatisand-o pe bunica la varsta studentiei sau actele vizand tranzactiile imobiliare din zona Copou realizate de rudele de pana la gradul IV).', 'bachelor', 13, 14, 15, ''),
-(6, '1740329384756', 'Drool', 'Sa se dezvolte un instrument Web de vizualizare, comparare si transformare a cursurilor valutelor virtuale (Bitcoin et al.) intre ele sau in concordanta cu cele reale. Se va oferi si serviciul Web aferent exploatabil conform paradigmei REST.', 'master', 16, 17, 18, ''),
-(7, '1740329384756', 'Kido', 'Sa se implementeze un sistem Web de monitorizare in timp real al unui copil, eventual pe baza unui senzor sau dispozitiv. Se vor oferi in orice moment atat locatia copilului pe o harta convenabil aleasa (e.g., la nivel de apartament, strada, cartier), cat si notificari daca se distanteaza la mai mult de M metri de un punct fix sau de coordonatele actuale ale parintelui/tutorelui. Suplimentar, se vor realiza notificari pe baza unui serviciu Web privind posibile accidente precum coliziuni cu masini, izbituri la sol, altercatii etc. De asemenea, se va oferi o interfata de administrare a copiilor monitorizati, inclusiv posibilitatea de a afla cu ce alti copii interactioneaza o anumita odrasla.', 'bachelor', 19, 20, 21, ''),
-(9, '1740329384756', 'Muler', 'Se doreste implementarea unei aplicatii si a unui serviciu Web ce monitorizeaza in timp-real calendarele disponibile online (e.g., Google Calendar) ale mai multor utilizatori -- posibili "prieteni" avand conturi in cadrul unor aplicatii sociale populare -- ale caror coordonate geografice sunt cunoscute. Se vor oferi sugestii (locatie potrivita, perioada de timp la nivel de saptamana, zi, ora etc.) privind posibile intalniri -- e.g., intalniri de lucru la proiect, sedinte de yoga, amuzamente in grup prin oras, preluarea rudelor colegilor de la gradinita/sanatoriu,...', 'master', 25, 26, 27, '');
+INSERT INTO `topics` (`topicId`, `picT`, `title`, `description`, `type`, `domain`) VALUES
+(1, '1740329384756', 'Acatism', 'Sa se realizeze o aplicatie Web privind managementul tezelor de licenta/master la nivelul unei facultati. Din punctul de vedere al profesorului, sistemul va oferi posibilitatea gestionarii temelor propuse si a studentilor arondati, inclusiv crearea unei planificari a celor mai importante etape pana la momentul sustinerii. Pentru studenti, aplicatia va fi capabila sa listeze/filtreze subiectele de interes pentru fiecare profesor in parte si sa permita inscrierea unei persoane in vederea indrumarii, eventual conform unor cerinte prelabile. Sistemul va verifica indeplinirea acestor cerinte, inclusiv va notifica -- via un flux Atom sau prin e-mail -- profesorul/studentul atunci cand survin intarzieri in efectuarea unor activitati (e.g., transmiterea unui raport preliminar) sau daca apar actualizari -- de pilda, profesorul a plasat o lista de lecturi recomandate. De asemenea, aplicatia va semnala posibile probleme privind variantele intermediare ale documentelor intocmite de student referitoare la format sau standarde de redactare. Progresul implementarii tezei va putea fi monitorizat automat prin intermermediul unui sistem online de management de cod-sursa precum Github.', 'bachelor', 'tw'),
+(2, '1740329384756', 'AcRe', 'Luand in consideratie pareri (barfe) deja disponibile din anii anteriori pe diverse retele sociale si statistici anonime privind notele obtinute (e.g., curba lui Gauss reala) la o materie, sa se realizeze un instrument Web ce recomanda unui student (restantier) grupa la care sa participe la orele de laborator + punctele slabe/tari ale studentului.', 'master', 'matematica'),
+(3, '1740329384756', 'Kido', 'Sa se implementeze un sistem Web de monitorizare in timp real al unui copil, eventual pe baza unui senzor sau dispozitiv. Se vor oferi in orice moment atat locatia copilului pe o harta convenabil aleasa (e.g., la nivel de apartament, strada, cartier), cat si notificari daca se distanteaza la mai mult de M metri de un punct fix sau de coordonatele actuale ale parintelui/tutorelui. Suplimentar, se vor realiza notificari pe baza unui serviciu Web privind posibile accidente precum coliziuni cu masini, izbituri la sol, altercatii etc. De asemenea, se va oferi o interfata de administrare a copiilor monitorizati, inclusiv posibilitatea de a afla cu ce alti copii interactioneaza o anumita odrasla.', 'master', 'tw');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `topicsreq`
+--
+
+CREATE TABLE IF NOT EXISTS `topicsreq` (
+  `topicId` int(11) NOT NULL,
+  `reqId` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `topicsreq`
+--
+
+INSERT INTO `topicsreq` (`topicId`, `reqId`) VALUES
+(1, 1),
+(1, 2),
+(1, 3),
+(2, 4),
+(2, 5),
+(2, 6);
 
 --
 -- Constraints for dumped tables
@@ -294,6 +290,13 @@ INSERT INTO `topics` (`topicId`, `picT`, `title`, `description`, `type`, `requir
 ALTER TABLE `grades`
   ADD CONSTRAINT `grades_ibfk_1` FOREIGN KEY (`picS`) REFERENCES `students` (`picS`),
   ADD CONSTRAINT `grades_ibfk_2` FOREIGN KEY (`subjectId`) REFERENCES `subjects` (`subjectId`);
+
+--
+-- Constraints for table `registrations`
+--
+ALTER TABLE `registrations`
+  ADD CONSTRAINT `registrations_ibfk_1` FOREIGN KEY (`picS`) REFERENCES `students` (`picS`),
+  ADD CONSTRAINT `registrations_ibfk_2` FOREIGN KEY (`picT`) REFERENCES `teachers` (`picT`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
