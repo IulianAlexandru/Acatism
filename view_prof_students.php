@@ -1,8 +1,9 @@
 <html>
 	<head>
 		<base href="<?php echo base_url(); ?>" />
+      <link href="css/add_topic.css" rel="stylesheet" type="text/css">
+      <link href="css/m-styles.min.css" rel="stylesheet" type="text/css">
       <link href="css/main_style.css" rel="stylesheet" type="text/css">
-        <link href="css/add_topic.css" rel="stylesheet" type="text/css">
         <script src="js/jquery-1.11.0.js"></script>
     <script src="js/main.js"></script>
         <script src="js/jquery.modal.js"></script>
@@ -19,19 +20,7 @@
           </div>
           <div class="modal-body">
             <h4 class="modal-maincontent"></h4>
-            <?php 
-            echo "<ul>";
-            if(count($registered)==0){
-            	echo "No registered students";
-            }
-            else{
-            	for($i=0;$i<count($registered);$i++){
-            		echo "<li>Name: ".$registered[$i]['name']." ".$registered[$i]['surname']." -> Topic: ".$registered[$i]['topic']." </li>";
-            	}
-            }
-            	
-            echo "</ul>";
-            ?>
+          
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default buton" data-dismiss="modal" ><a href="#close" rel="modal:close">Close window</a></button>
@@ -59,21 +48,45 @@
 
 			echo "</ul>";
 		?>
-		<button id="studentsBtn" class="buton">Students</button>
+        <h2>Registered Students</h2>
+          <?php 
+            echo "<ul>";
+            if(count($registered)==0){
+            	echo "No registered students";
+            }
+            else{
+            	for($i=0;$i<count($registered);$i++){
+            		echo "<li class='registerList cl-effect-1' >Name: ".$registered[$i]['name']." ".$registered[$i]['surname']." -> Topic: ".$registered[$i]['topic']."<a href='' class='deleteStudent m-btn red'><span data-hover='Delete student'>Delete student</span><i class='icon-trash'></i></a><a href='' class='viewDeadlines m-btn blue'><span data-hover='View deadlines'>View deadlines</span><i class='icon-plus'></i></a><a href='' class='viewProfile m-btn red'><span data-hover='View profile'>View profile</span><i class='icon-trash'></i></a>";
+            	}
+            }
+            	
+            echo "</ul>";
+            ?>
+		<!--<button id="studentsBtn" class="buton">Students</button>-->
 	</div>
 	<script>
 	$(document).ready(function(){
 		$(".hiddenPic").css({'display':'none'});
 
 	});
-	$("#studentsBtn").click(function(e){
+	/*$("#studentsBtn").click(function(e){
            e.preventDefault();
           $(".modal-title").html("Your registered students");
           $("#students-modal").modal({
             fadeDuration: 250,
             showClose: false
           });
-        });
+        });*/
+        
+    $(".viewProfile").click(function(e){
+       e.preventDefault(); 
+    });  
+    $(".deleteStudent").click(function(e){
+        e.preventDefault(); 
+    });   
+    $(".viewDeadlines").click(function(e){
+       e.preventDefault(); 
+    });
 	$(".messageList .accept").click(function(e){
 		e.preventDefault();
 		$(".activeB").removeClass('activeB');
