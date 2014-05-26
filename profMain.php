@@ -21,46 +21,40 @@ class Profmain extends CI_Controller{
         if($registeredArray == null){
           $registered = null;
         }
-        for($i=0;$i<count($registeredArray);$i++){
-          $aux = $this->get_data->get_student_name($registeredArray[$i]['picS']);
-          $registered[$i]['name'] = $aux['name'];
-          $registered[$i]['surname'] = $aux['surname'];
-          $registered[$i]['topic'] = $registeredArray[$i]['topic'];
-        }
+        else{
+                for($i=0;$i<count($registeredArray);$i++){
+                  $aux = $this->get_data->get_student_name($registeredArray[$i]['picS']);
+                  $registered[$i]['name'] = $aux['name'];
+                  $registered[$i]['surname'] = $aux['surname'];
+                  $registered[$i]['topic'] = $this->get_data->get_topic_name($registeredArray[$i]['topicId']);
+                }
+           }
         $dataToPass['messagesData'] = $messagesData;
         $dataToPass['names'] = $names;
         $dataToPass['registered'] = $registered;
- 
-			 $this->load->view('view_prof_students',$dataToPass);
+        $this->load->view('view_prof_students',$dataToPass);
 		}
 		
 
 		public function load_subjects($picT){
-			$this->load->model('get_data');
-            
-            $newData = $this->get_data->get_topic_data($picT);
-            $dataToPass = array('data' => $newData);
-            $reqArray = null;
-            for($i=0;$i<count($dataToPass['data']);$i++){
-            	if($dataToPass['data'][$i]['requirement1']!=null){
-            		$var = $this->get_data->get_req($dataToPass['data'][$i]['requirement1']);
-            		$reqArray[$i]['requirement1_subj']= $this->get_data->get_subj_name($var[0]['subjectId']);
-            		$reqArray[$i]['requirement1_grade'] = $var[0]['grade'];  
-            	}
-            	if($dataToPass['data'][$i]['requirement2']!=null){
-            		$var = $this->get_data->get_req($dataToPass['data'][$i]['requirement2']);
-            		$reqArray[$i]['requirement2_subj']= $this->get_data->get_subj_name($var[0]['subjectId']);
-            		$reqArray[$i]['requirement2_grade'] = $var[0]['grade'];  
-            	}
-            	if($dataToPass['data'][$i]['requirement3']!=null){
-            		$var = $this->get_data->get_req($dataToPass['data'][$i]['requirement3']);
-            		$reqArray[$i]['requirement3_subj'] = $this->get_data->get_subj_name($var[0]['subjectId']);
-            		$reqArray[$i]['requirement3_grade'] = $var[0]['grade'];  
-            	}
+			$this->load->model('get_data');          
+            $newData = $this->get_data->get_topic_data($picT);          
+            $requirements = null;         
+            for($i=0;$i<count($newData);$i++){
+            	$requirements = $this->get_data->get_req_topic($newData[$i]['topicId']);
+             
+                for($j=0;$j<count($requirements);$j++){
+                    $reqId = $requirements[$j]['reqId'];
+                    $auxArray = $this->get_data->get_req($reqId);
+                    
+                    $requirements[$j]['subjName'] = $this->get_data->get_subj_name($auxArray['subjectId']);
+                    $requirements[$j]['grade'] = $auxArray['grade'];
+                }
+                $newData[$i]['requirements'] = $requirements;
             }
-
-           $dataToPass['reqArray'] = $reqArray;
+            $dataToPass['data'] = $newData;
            $dataToPass['allSubjects'] = $this->get_data->get_subjects();
+            $dataToPass['auxArray'] = $auxArray;
 			$this->load->view('view_prof_subjects',$dataToPass);
 		}
 		public function load_deadlines(){
@@ -75,8 +69,10 @@ class Profmain extends CI_Controller{
       $picS = $this->input->post('picS');
       $picT = $this->input->post('picT');
       $topic = $this->input->post('topic');
-      $this->load->model('insert_data');
-      $this->insert_data->insert_registration($picS,$picT,$topic);
+      $this->load->model('get_data');
+      $topicId = $this->get_data->get_topic_id($topic);
+      $this->load->model('insert_data');    
+      $this->insert_data->insert_registration($picS,$picT,$topicId);
     
   
       $message = "You have been accepted!";
@@ -127,51 +123,94 @@ class Profmain extends CI_Controller{
            $title = $this->input->post('title');
            $description = $this->input->post('description');
            $type = $this->input->post('type');
-           $req1_number = $this->input->post('req1_number');
-           $req1_subject = $this->input->post('req1_subject');
-           $req2_number = $this->input->post('req2_number');
-           $req2_subject = $this->input->post('req2_subject');
-           $req3_number = $this->input->post('req3_number');
-           $req3_subject = $this->input->post('req3_subject');
-           $other = $this->input->post('other');
+           $requirements1 = $this->input->post('requirements');
+           $domain = $this->input->post('domain');
            $picT = $this->input->post('picT');
+         $this->load->model('insert_data');
+          $this->insert_data->insert_topic($picT,$title,$description,$type,$domain,$requirements1);
+            
 
-          $this->load->model('insert_data');
-          $this->insert_data->insert_topic($picT,$title,$description,$type,$req1_number,$req1_subject,$req2_number,
-          $req2_subject,$req3_number,$req3_subject,$other);
-
-
-          $this->load->model('get_data');
-      
-          $newData = $this->get_data->get_topic_data($picT);
-          $dataToPass = array('data' => $newData);
-          $reqArray = null;
-          for($i=0;$i<count($dataToPass['data']);$i++){
-                if($dataToPass['data'][$i]['requirement1']!=null){
-                      $var = $this->get_data->get_req($dataToPass['data'][$i]['requirement1']);
-                      $reqArray[$i]['requirement1_subj']= $this->get_data->get_subj_name($var[0]['subjectId']);
-                      $reqArray[$i]['requirement1_grade'] = $var[0]['grade'];  
+          $this->load->model('get_data');          
+            $newData = $this->get_data->get_topic_data($picT);          
+            $requirements = null;         
+            for($i=0;$i<count($newData);$i++){
+            	$requirements = $this->get_data->get_req_topic($newData[$i]['topicId']);
+             
+                for($j=0;$j<count($requirements);$j++){
+                    $reqId = $requirements[$j]['reqId'];
+                    $auxArray = $this->get_data->get_req($reqId);
+                    
+                    $requirements[$j]['subjName'] = $this->get_data->get_subj_name($auxArray['subjectId']);
+                    $requirements[$j]['grade'] = $auxArray['grade'];
                 }
-                if($dataToPass['data'][$i]['requirement2']!=null){
-                      $var = $this->get_data->get_req($dataToPass['data'][$i]['requirement2']);
-                      $reqArray[$i]['requirement2_subj']= $this->get_data->get_subj_name($var[0]['subjectId']);
-                      $reqArray[$i]['requirement2_grade'] = $var[0]['grade'];  
-                }
-                if($dataToPass['data'][$i]['requirement3']!=null){
-                      $var = $this->get_data->get_req($dataToPass['data'][$i]['requirement3']);
-                      $reqArray[$i]['requirement3_subj'] = $this->get_data->get_subj_name($var[0]['subjectId']);
-                      $reqArray[$i]['requirement3_grade'] = $var[0]['grade'];  
-                }
-          }
-
-           $dataToPass['reqArray'] = $reqArray;
+                $newData[$i]['requirements'] = $requirements;
+            }
+            $dataToPass['data'] = $newData;
            $dataToPass['allSubjects'] = $this->get_data->get_subjects();
-           $this->load->view('view_prof_subjects',$dataToPass);
+            $dataToPass['auxArray'] = $auxArray;
+			$this->load->view('view_prof_subjects',$dataToPass);
             
             
     }
+    public function edit_form(){
+            $title = $this->input->post('title');
+           $description = $this->input->post('description');
+           $type = $this->input->post('type');
+           $requirements1 = $this->input->post('requirements');
+           $domain = $this->input->post('domain');
+           $picT = $this->input->post('picT');
+           $topicId = $this->input->post('topicId');
+           $this->load->model('update_data');
+           $this->update_data->update_topic($picT,$title,$description,$type,$domain,$requirements1,$topicId);
+            
 
-	}
+          $this->load->model('get_data');          
+            $newData = $this->get_data->get_topic_data($picT);          
+            $requirements = null;         
+            for($i=0;$i<count($newData);$i++){
+            	$requirements = $this->get_data->get_req_topic($newData[$i]['topicId']);
+             
+                for($j=0;$j<count($requirements);$j++){
+                    $reqId = $requirements[$j]['reqId'];
+                    $auxArray = $this->get_data->get_req($reqId);
+                    
+                    $requirements[$j]['subjName'] = $this->get_data->get_subj_name($auxArray['subjectId']);
+                    $requirements[$j]['grade'] = $auxArray['grade'];
+                }
+                $newData[$i]['requirements'] = $requirements;
+            }
+            $dataToPass['data'] = $newData;
+           $dataToPass['allSubjects'] = $this->get_data->get_subjects();
+            $dataToPass['auxArray'] = $auxArray;
+			$this->load->view('view_prof_subjects',$dataToPass);
+    }
+    public function delete_topic(){
+        $topicId = $this->input->post('topicId');
+        $picT = $this->input->post('picT');
+        $this->load->model('delete_data');
+        $this->delete_data->delete_topic($topicId);
+         $this->load->model('get_data');          
+            $newData = $this->get_data->get_topic_data($picT);          
+            $requirements = null;         
+            for($i=0;$i<count($newData);$i++){
+            	$requirements = $this->get_data->get_req_topic($newData[$i]['topicId']);
+             
+                for($j=0;$j<count($requirements);$j++){
+                    $reqId = $requirements[$j]['reqId'];
+                    $auxArray = $this->get_data->get_req($reqId);
+                    
+                    $requirements[$j]['subjName'] = $this->get_data->get_subj_name($auxArray['subjectId']);
+                    $requirements[$j]['grade'] = $auxArray['grade'];
+                }
+                $newData[$i]['requirements'] = $requirements;
+            }
+            $dataToPass['data'] = $newData;
+           $dataToPass['allSubjects'] = $this->get_data->get_subjects();
+            $dataToPass['auxArray'] = $auxArray;
+			$this->load->view('view_prof_subjects',$dataToPass);
+    }
+    
+}
 
 
 
